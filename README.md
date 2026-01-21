@@ -1,4 +1,4 @@
-# fabric-datasource-inventory
+# fabric-inventory
 
 The script is designed to extract Microsoft Fabric workspace metadata along with users, semantic models, and datasources into csv files.
 
