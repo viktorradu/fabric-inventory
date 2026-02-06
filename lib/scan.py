@@ -21,7 +21,7 @@ class Scan:
 
             scanResult = self.client.get(f'v1.0/myorg/admin/workspaces/scanResult/{scanInfo["id"]}')
 
-            result = {'workspaces': [], 'users': [], 'models': [], 'datasources': []}
+            result = {'workspaces': [], 'users': [], 'models': [], 'dataflows': [], 'datasources': []}
             for workspace in scanResult.get('workspaces'):
                 ws = {}
                 result['workspaces'].append(ws)
@@ -37,6 +37,14 @@ class Scan:
                     ds['name'] = model.get('name')
                     ds['datasources'] = [usage.get('datasourceInstanceId') for usage in model.get('datasourceUsages', [])]
 
+                for flow in workspace.get('dataflows', []):
+                    ds = {}
+                    result['dataflows'].append(ds)
+                    ds['workspaceId'] = workspace.get('id')
+                    ds['id'] = flow.get('id')
+                    ds['name'] = flow.get('name')
+                    ds['datasources'] = [usage.get('datasourceInstanceId') for usage in flow.get('datasourceUsages', [])]
+
                 users = workspace.get('users', [])
                 for user in users if users is not None else []:
                     u = {}
@@ -47,13 +55,13 @@ class Scan:
                     u['principalType'] = user.get('principalType')
                     u['displayName'] = user.get('displayName')
                 
-                for datasource in scanResult.get('datasourceInstances', []):
-                    dsi = {}
-                    result['datasources'].append(dsi)
-                    dsi['datasourceType'] = datasource.get('datasourceType')
-                    dsi['connectionDetails'] = datasource.get('connectionDetails')
-                    dsi['gatewayId'] = datasource.get('gatewayId')
-                    dsi['datasourceId'] = datasource.get('datasourceId')
+            for datasource in scanResult.get('datasourceInstances', []):
+                dsi = {}
+                result['datasources'].append(dsi)
+                dsi['datasourceType'] = datasource.get('datasourceType')
+                dsi['connectionDetails'] = datasource.get('connectionDetails')
+                dsi['gatewayId'] = datasource.get('gatewayId')
+                dsi['datasourceId'] = datasource.get('datasourceId')
             
             return result
                 
