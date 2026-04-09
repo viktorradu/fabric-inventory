@@ -8,6 +8,35 @@ class Scan:
         workspaces = self.client.get('v1.0/myorg/admin/workspaces/modified?excludePersonalWorkspaces=True')    
         return workspaces
 
+    def list_workspaces_by_capacities(self, capacity_ids: list) -> list:
+        """List workspaces for specific capacities."""
+        all_workspaces = []
+        page_size = 5000
+        for capacity_id in capacity_ids:
+            skip = 0
+            while True:
+                workspaces = self.client.get(
+                    f"v1.0/myorg/admin/groups?$filter=capacityId eq '{capacity_id}'&$top={page_size}&$skip={skip}"
+                )
+                if not isinstance(workspaces, dict):
+                    print(f"Warning: Unexpected response while retrieving capacity {capacity_id}")
+                    break
+
+                if workspaces.get('error'):
+                    print(f"Warning: Could not retrieve workspaces for capacity {capacity_id}")
+                    break
+
+                workspace_list = workspaces.get('value', [])
+                if not isinstance(workspace_list, list):
+                    print(f"Warning: Unexpected workspace list format for capacity {capacity_id}")
+                    break
+                all_workspaces.extend(workspace_list)
+
+                if len(workspace_list) < page_size:
+                    break
+                skip += page_size
+        return all_workspaces
+
     def scan_workspaces(self, workspace_ids: list) -> list:
         workspace_list = '","'.join(workspace_ids)
         body = f'{{"workspaces":["{workspace_list}"]}}'
