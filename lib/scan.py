@@ -64,6 +64,7 @@ class Scan:
                     ds['workspaceId'] = workspace.get('id')
                     ds['id'] = model.get('id')
                     ds['name'] = model.get('name')
+                    ds['createdDate'] = model.get('createdDate')
                     ds['datasources'] = [usage.get('datasourceInstanceId') for usage in model.get('datasourceUsages', [])]
 
                 for flow in workspace.get('dataflows', []):
@@ -72,6 +73,7 @@ class Scan:
                     ds['workspaceId'] = workspace.get('id')
                     ds['id'] = flow.get('id')
                     ds['name'] = flow.get('name')
+                    ds['createdDate'] = flow.get('createdDate')
                     ds['datasources'] = [usage.get('datasourceInstanceId') for usage in flow.get('datasourceUsages', [])]
 
                 users = workspace.get('users', [])
