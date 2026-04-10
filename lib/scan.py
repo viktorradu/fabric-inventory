@@ -9,15 +9,16 @@ class Scan:
         return workspaces
 
     def list_workspaces_by_capacities(self, capacity_ids: list) -> list:
-        """List workspaces for specific capacities."""
+        """List workspaces for specific capacities using Fabric Admin API."""
         all_workspaces = []
-        page_size = 5000
         for capacity_id in capacity_ids:
-            skip = 0
+            continuation_token = None
             while True:
-                workspaces = self.client.get(
-                    f"v1.0/myorg/admin/groups?$filter=capacityId eq '{capacity_id}'&$top={page_size}&$skip={skip}"
-                )
+                url = f"v1/admin/workspaces?capacityId={capacity_id}&state=Active"
+                if continuation_token:
+                    url += f"&continuationToken={continuation_token}"
+                
+                workspaces = self.client.get(url)
                 if not isinstance(workspaces, dict):
                     print(f"Warning: Unexpected response while retrieving capacity {capacity_id}")
                     break
@@ -26,15 +27,15 @@ class Scan:
                     print(f"Warning: Could not retrieve workspaces for capacity {capacity_id}")
                     break
 
-                workspace_list = workspaces.get('value', [])
+                workspace_list = workspaces.get('workspaces', [])
                 if not isinstance(workspace_list, list):
                     print(f"Warning: Unexpected workspace list format for capacity {capacity_id}")
                     break
                 all_workspaces.extend(workspace_list)
 
-                if len(workspace_list) < page_size:
+                continuation_token = workspaces.get('continuationToken')
+                if not continuation_token:
                     break
-                skip += page_size
         return all_workspaces
 
     def scan_workspaces(self, workspace_ids: list) -> list:
